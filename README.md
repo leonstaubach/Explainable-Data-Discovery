@@ -22,8 +22,8 @@ This process expects tabular data.
 Firstly, the latest development version should be cloned through
 
 ```
-git clone URL
-cd FOLDER
+git clone git@github.com:leonstaubach/Explainable-Data-Discovery.git
+cd Explainable-Data-Discovery
 pip3 install -r requirements.txt
 ```
 
