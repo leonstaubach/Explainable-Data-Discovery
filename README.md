@@ -24,10 +24,9 @@ Firstly, the latest development version should be cloned through
 ```
 git clone git@github.com:leonstaubach/Explainable-Data-Discovery.git
 cd Explainable-Data-Discovery
+python3 -m venv venv && source venv/bin/activate
 pip3 install -r requirements.txt
 ```
-
-Alternatively, a virtual environment can be created to install the required dependencies.
 
 Python 3.2 or higher is required for this repository to run properly.
 
