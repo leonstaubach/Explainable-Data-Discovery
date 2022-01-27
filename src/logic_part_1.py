@@ -312,32 +312,17 @@ def get_result_table(df: pd.DataFrame = pd.DataFrame()):
 
     :returns ranked feature matrix
     """
-    # ToDo Think about removing this or moving it to a seperate test case
-    # Load data from paper (default small dataset)
-    if df.empty:
-        input_base_path = os.path.abspath(config.BASE_PROCESSED_DATA_FOLDER) + "/paper_dataframe.parquet"
-        if not os.path.exists(input_base_path):
-            print(f"Path {input_base_path} does not exist, quitting")
-            quit()
-        
-        loaded_table = pq.read_table(input_base_path)
-        df = loaded_table.to_pandas()
-        df.attrs = {col: {"datatype": int} for col in df.columns}
-        columns = list(df.columns)
-        numpy_data = df.to_numpy()
 
-    else:
-        print(df)
-        columns = list(df.columns)
-        logging.info(f"\nThe following columns represent the data:\n{pd.DataFrame(columns, columns=['Column Names']).to_markdown()}")
+    print(df)
+    columns = list(df.columns)
+    logging.info(f"\nThe following columns represent the data:\n{pd.DataFrame(columns, columns=['Column Names']).to_markdown()}")
 
-        numpy_data = prepare_data_for_mutual_information(df) 
-        logging.info(f"\nDataset Shape: {numpy_data.shape})")    
+    numpy_data = prepare_data_for_mutual_information(df) 
+    logging.info(f"\nDataset Shape: {numpy_data.shape})")    
     
     entropy_values = feature_entropy(numpy_data, df.attrs, columns)
     print(f"Entropy Values for each feature:\n{entropy_values}\n")
 
-    # ToDo i cant of don't want this in my code that i upload
     # For comparison between sklearn's MI implementation. Works only for integer values, therefore i compare my list-mi-variant.
     try:
         start = time.time()
@@ -457,7 +442,7 @@ def get_result_table(df: pd.DataFrame = pd.DataFrame()):
     logging.info(f"\nOld Result Table - showcasing Entropy, Avg Norm MI Score and the Old Final Ranking:\n\n{old_prettified_view.to_markdown()}")
     
     logging.info(f"\nResult Table - showcasing Entropy, Avg Norm MI Score and the Highest (remaining) NMI:\n\n{prettified_view.to_markdown()}")
-
+    
     return new_result_view_step_1, old_result_view_step_1
 
 if __name__ == "__main__":
