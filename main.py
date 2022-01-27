@@ -1,9 +1,6 @@
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path('.').absolute()))
-
 import logging
 from multiprocessing import cpu_count
+import sys
 
 import config
 import src.utils as utils
@@ -52,7 +49,6 @@ def main():
 
 
     # 4. Apply clustering
-    logging.info(f"{dataset.get_training_df().columns}")
     n_jobs = min(cpu_count(), config.K_PROTOTYPE_REPEAT_NUM)
     verbose = False if n_jobs > 1 else True
     k = meta_data["k"]
@@ -65,22 +61,15 @@ def main():
 
     # 5. Create comparable UMAP view between the full and the optimal feature set
     if config.STORE_IMAGES_DURING_EXECUTION or config.SHOW_IMAGES_DURING_EXECUTION:
-        
-        utils.check_dir_file(config.PATH_OUTPUT_IMAGES, False)
         path = f"{config.PATH_OUTPUT_IMAGES}/3_0_FULL_FEATURE_k={k}.png"
-
         full_indices_map = utils.create_indices_map(dataset.get_training_df().columns, dataset.get_training_df().attrs)
-        
+
         logging.info(f"\nStarting K-Prototypes with {n_jobs} threads to create initial UMap visualisation ..")
-
         full_k_prototype = KPrototypes(n_clusters=k, init='Cao', n_init=config.K_PROTOTYPE_REPEAT_NUM, verbose=verbose, n_jobs=n_jobs)
-
         full_prototype_labels, _, _ = full_k_prototype.fit_predict(dataset.get_training_df(), indices_map=full_indices_map)
         create_umap_plot(dataset.get_training_df(), full_prototype_labels, k, full_indices_map, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path, n_neighbors=35)
         
-        utils.check_dir_file(config.PATH_OUTPUT_IMAGES, False)
         path = f"{config.PATH_OUTPUT_IMAGES}/3_1_OPTIMAL_FEATURE_k={k}.png"
-    
         create_umap_plot(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path, n_neighbors=35)
     
     # 6. Create tables to represeent the centroids

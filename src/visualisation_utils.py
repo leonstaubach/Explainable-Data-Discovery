@@ -580,7 +580,7 @@ def visualize_labeled_dataframe_transformation(data_frame: pd.DataFrame, target_
 
             plt.close(fig)
 
-def create_umap_plot(data_frame: pd.DataFrame, target_labels: list, k: int, indices_map: dict, store_image, show_image, path, dist_fct="hamming", n_neighbors=50, min_dist=0.1):
+def create_umap_plot(data_frame: pd.DataFrame, target_labels: list, k: int, indices_map: dict, store_image, show_image, path, dist_fct=config.UMAP_PARAM_METRIC, n_neighbors=config.UMAP_PARAM_N_NEIGHBORS, min_dist=config.UMAP_PARAM_MIN_DIST):
     """ Creates a UMAP plot for the given data and labels.
 
     :param data_frame:              The given dataframe

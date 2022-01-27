@@ -63,6 +63,12 @@ MAX_COLS_TO_DISPLAY=3
 DISPLAY_SIZE=(20,9)
 # How many DPI's should be used for the image
 DPI_TO_STORE=350
+# UMaps n_neighbors parameter
+UMAP_PARAM_N_NEIGHBORS=15
+# UMaps min_Dist parameter
+UMAP_PARAM_MIN_DIST=0.1
+# UMaps metric parameter
+UMAP_PARAM_METRIC="hamming"
 ################################################################################################################
 
 
