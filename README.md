@@ -13,7 +13,7 @@ Essentially, this repository implements a process to
 - calculate metrics to assess the quality of the proposed clustering
 
 The core-approach is an extended version of the k-Prototypes algorithm, which was firstly proposed by [Huang97] and is intended to calculate clusters from a mixed dataset of numerical and categorical variables in an unsupervised environment.
-The base implementation was taken from [this](https://github.com/nicodv/kmodes#huang97) repository, but extended to handle further data-types, like compositions and cyclic datatypes.
+The base implementation was taken from [this](https://github.com/nicodv/kmodes) repository, but extended to handle further data-types, like compositions and cyclic datatypes.
 
 ### Installation
 
