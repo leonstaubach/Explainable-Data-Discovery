@@ -15,6 +15,8 @@ Essentially, this repository implements a process to
 The core-approach is an extended version of the k-Prototypes algorithm, which was firstly proposed by [Huang97] and is intended to calculate clusters from a mixed dataset of numerical and categorical variables in an unsupervised environment.
 The base implementation was taken from [this](https://github.com/nicodv/kmodes) repository, but extended to handle further data-types, like compositions and cyclic datatypes.
 
+This process expects tabular data.
+
 ### Installation
 
 Firstly, the latest development version should be cloned through
@@ -52,6 +54,8 @@ This process might not be optimal, if:
 - Flat geometry does not describe the data well
 - Outliers are common (since they are not detectable by k-Prototypes)
 - No mixed-data (classic approaches are usually more established and researched on)
+
+Furthermore, the underlying raw activity data is not uploaded to this repository due to NDA reasons.
 
 ### Outlook
 
