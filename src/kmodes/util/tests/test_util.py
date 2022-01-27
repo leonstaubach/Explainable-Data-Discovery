@@ -5,10 +5,9 @@ Tests for utils
 import unittest
 
 import numpy as np
-from nose.tools import assert_equal
 from sklearn.utils._testing import assert_array_equal
 
-from kmodes.util import get_max_value_key, encode_features, get_unique_rows, \
+from src.kmodes.util import get_max_value_key, encode_features, get_unique_rows, \
     decode_centroids
 
 

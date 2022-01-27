@@ -15,8 +15,8 @@ from src.logic_part_2 import calculate_normalized_ch_index
 from src.data_loader import CustomDataset
 from src.visualisation_utils import create_umap_plot, create_cluster_table, visualize_labeled_dataframe_transformation
 from src.metrics import create_explicit_feature_importance
-from kmodes.kprototypes import KPrototypes
-from kmodes.util.dissim import matching_dissim, euclidean_dissim, matching_dissim_lists, time_dissim
+from src.kmodes.kprototypes import KPrototypes
+from src.kmodes.util.dissim import matching_dissim, euclidean_dissim, matching_dissim_lists, time_dissim
 def main():
     logging.info('\n' + '-' * 15 + ' BEGINNING NEW PROCESS'  + '-' * 15)
     logging.info(utils.config_to_str())

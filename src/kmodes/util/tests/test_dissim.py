@@ -8,8 +8,8 @@ import numpy as np
 from nose.tools import assert_equal
 from sklearn.utils._testing import assert_array_equal
 
-from kmodes.util.dissim import matching_dissim, euclidean_dissim, ng_dissim
-from kmodes.util.dissim import jaccard_dissim_binary, jaccard_dissim_label
+from src.kmodes.util.dissim import matching_dissim, euclidean_dissim, ng_dissim
+from src.kmodes.util.dissim import jaccard_dissim_binary, jaccard_dissim_label
 
 
 class TestDissimilarityMeasures(unittest.TestCase):

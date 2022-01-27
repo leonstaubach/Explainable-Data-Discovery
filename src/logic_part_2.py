@@ -13,8 +13,8 @@ import config
 from src.data_loader import CustomDataset
 from src.visualisation_utils import create_linecharts_elbow_method
 import src.utils as utils
-from kmodes.util import get_max_value_key
-from kmodes.kprototypes import KPrototypes, adjusted_ch_index, costs
+from src.kmodes.util import get_max_value_key
+from src.kmodes.kprototypes import KPrototypes, adjusted_ch_index, costs
 from multiprocessing import cpu_count
 
 """

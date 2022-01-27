@@ -9,8 +9,8 @@ from src.logic_part_2 import execute_iterative_clustering
 from src.data_loader import CustomDataset
 from src.visualisation_utils import create_umap_plot, create_cluster_table, visualize_labeled_dataframe_transformation
 from src.metrics import create_explicit_feature_importance
-from kmodes.kprototypes import KPrototypes
-from kmodes.util.dissim import matching_dissim, euclidean_dissim, matching_dissim_lists, time_dissim
+from src.kmodes.kprototypes import KPrototypes
+from src.kmodes.util.dissim import matching_dissim, euclidean_dissim, matching_dissim_lists, time_dissim
 
 def main():
     logging.info('\n' + '-' * 15 + ' BEGINNING NEW PROCESS'  + '-' * 15)
@@ -67,10 +67,10 @@ def main():
         logging.info(f"\nStarting K-Prototypes with {n_jobs} threads to create initial UMap visualisation ..")
         full_k_prototype = KPrototypes(n_clusters=k, init='Cao', n_init=config.K_PROTOTYPE_REPEAT_NUM, verbose=verbose, n_jobs=n_jobs)
         full_prototype_labels, _, _ = full_k_prototype.fit_predict(dataset.get_training_df(), indices_map=full_indices_map)
-        create_umap_plot(dataset.get_training_df(), full_prototype_labels, k, full_indices_map, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path, n_neighbors=35)
+        create_umap_plot(dataset.get_training_df(), full_prototype_labels, k, full_indices_map, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
         
         path = f"{config.PATH_OUTPUT_IMAGES}/3_1_OPTIMAL_FEATURE_k={k}.png"
-        create_umap_plot(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path, n_neighbors=35)
+        create_umap_plot(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
     
     # 6. Create tables to represeent the centroids
     centroids_table, counts_table = create_cluster_table(optimal_indices, list(dataset.get_training_df().columns), optimal_k_prototype.cluster_centroids_, optimal_k_prototype.labels_, dataset.get_training_df().attrs)

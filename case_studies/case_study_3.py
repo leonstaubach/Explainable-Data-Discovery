@@ -12,7 +12,7 @@ from multiprocessing import cpu_count
 import src.utils as utils
 import config
 from src.data_loader import CustomDataset
-from kmodes.kprototypes import KPrototypes
+from src.kmodes.kprototypes import KPrototypes
 
 def main():
     logging.info('\n' + '-' * 15 + ' BEGINNING NEW PROCESS'  + '-' * 15)

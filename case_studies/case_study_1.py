@@ -15,7 +15,7 @@ utils.check_dir_file(config.PATH_OUTPUT_IMAGES, False)
 from src.logic_part_2 import calculate_normalized_ch_index
 from src.data_loader import CustomDataset
 from src.visualisation_utils import create_umap_plot
-from kmodes.kprototypes import KPrototypes
+from src.kmodes.kprototypes import KPrototypes
 
 def main():
     logging.info('\n' + '-' * 15 + ' BEGINNING NEW PROCESS'  + '-' * 15)
