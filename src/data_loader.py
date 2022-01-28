@@ -133,7 +133,7 @@ class CustomDataset:
         prepare_dataset(self.df_training, ignore_times, ignore_lists)
         self.df_eval = df[config.IGNORABLE_FEATURES_FOR_EVAL]
 
-    def __str__(self) -> None:
+    def __str__(self) -> str:
         nl = '\n\t'
         return f"{'*'*30}\n" + \
         f"Shape of Training Set (Rows x Columns):\t{self.df_training.shape}\n\n" +\
