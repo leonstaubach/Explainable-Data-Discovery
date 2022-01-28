@@ -5,7 +5,8 @@ Compares different configs for UMAP. More of a on-demand testing script.
 -> TL;DR:
         Hamming Distance is sufficient
         n_neighbors of 35-50 is sufficient (UMap fails to create the embedding with a zsh: bus error for lower n_neighbors)
-        Init-Method of "random" is quicker, but results in "low quality", so keep it on default
+        min_dist is less important, can be set to default of 0.1
+        metric of "random" is quicker, but results in "low quality", so keep it on default
         
 """
 
