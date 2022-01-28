@@ -13,8 +13,8 @@ TARGET_ACTIVITY_TYPE = "NameOfTheActivityType"
 TEST_MODE_CATEGORY = ""
 # Compression algorithm used for the data (for logging and path resolving only)
 COMPRESSION_ALGORITHM="gzip"
-# Relative path of the parqet file
-BASE_PROCESSED_DATA_FOLDER = "dataSetup/processed_data"
+# Relative path of the parqet file (for example the local folder 'data'
+BASE_PROCESSED_DATA_FOLDER = "data"
 ############################################################################################################
 
 ############################################################################################################
