@@ -31,10 +31,10 @@ def load_df(data_description_path: str):
     path = input_base_path + "/" + input_file
 
     if not os.path.exists(path):
-        print(f"Path {path} does not exist, quitting")
+        logging.info(f"Path {path} does not exist, quitting")
         quit()
 
-    print(f"Loading from {path}")
+    logging.info(f"Loading from {path}")
     loaded_table = pq.read_table(path)
 
     return loaded_table.to_pandas()
