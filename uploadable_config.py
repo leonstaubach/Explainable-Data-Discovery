@@ -34,6 +34,10 @@ ANONIMIZE_FEATURE_NAMES=True
 MAX_NUM_CLUSTERS_ELBOW = 10
 # How often a k-Prototype run should be repeated (to find optimal solutions for partially random inializations)
 K_PROTOTYPE_REPEAT_NUM = 5
+# Whether to update the gamma value (weight of non-numerical variables) each iteration or not.
+# False is recommended per default for comparability between iterations of clustering.
+# True can be used for experimental reasons.
+UPDATE_GAMMA_EACH_ITERATION = False
 # Which formula to use for the feature ranking. Options: {"formula+1", "formula_normalized"}
 FEATURE_IMPORTANCE_METRIC = "formula+1"
 #############################################################################################################

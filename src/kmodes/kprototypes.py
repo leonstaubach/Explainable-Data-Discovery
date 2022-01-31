@@ -12,7 +12,6 @@ from scipy import sparse
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_array
 from tqdm import tqdm
-from deprecated import deprecated
 from copy import deepcopy
 import logging
 from . import kmodes
@@ -20,7 +19,7 @@ from .util import get_max_value_key, pandas_to_numpy, find_max_frequency_attribu
 from .util.dissim import matching_dissim, euclidean_dissim, matching_dissim_lists, time_dissim
 from .util.init_methods import init_cao, init_cao_lists, init_huang
 from src.utils import _split_num_cat, initialize_gamma, WouldTryRandomInitialization
-from config import K_PROTOTYPE_REPEAT_NUM
+from config import K_PROTOTYPE_REPEAT_NUM, UPDATE_GAMMA_EACH_ITERATION
 
 # Number of tries we give the initialization methods to find non-empty
 # clusters before we switch to random initialization.
@@ -393,7 +392,7 @@ def _k_prototypes_single(Xnum, Xcat, Xlist, Xtime, nnumattrs, ncatattrs, nlistat
             cat_distances=cat_dissim(centroids[1], Xcat[ipoint], X=Xcat, membship=membship) if Xcat.size!=0 else 0
             list_distances=list_dissim(centroids[2], Xlist[ipoint]) if Xlist.size!=0 else 0
             time_distances=time_dissim(centroids[3], Xtime[ipoint], time_max_values=time_max_values) if Xtime.size!=0 else 0
-            clust = np.argmin(num_distances+ gamma * (cat_distances + list_distances + time_distances))
+            clust = np.argmin(num_distances + gamma * (cat_distances + list_distances + time_distances))
             
             membship[clust, ipoint] = 1
             # How many datapoints are in the current cluster!
@@ -455,6 +454,10 @@ def _k_prototypes_single(Xnum, Xcat, Xlist, Xtime, nnumattrs, ncatattrs, nlistat
     while itr < max_iter and not converged:
         itr += 1
 
+        if UPDATE_GAMMA_EACH_ITERATION:
+            gamma = _update_gamma_values(gamma, Xnum, membship, n_clusters)
+            logging.info(f"\nUpdated Gamma Values: {gamma}")
+
         centroids, moves, membship = _k_prototypes_iter(Xnum, Xcat, Xlist, Xtime, centroids,
                                               cl_attr_sum_num, cl_memb_sum, cl_attr_freq_cat, cl_attr_freq_list, cl_attr_freq_time,
                                               membship, num_dissim, cat_dissim, list_dissim, time_dissim, time_max_values, gamma,
@@ -463,8 +466,8 @@ def _k_prototypes_single(Xnum, Xcat, Xlist, Xtime, nnumattrs, ncatattrs, nlistat
         labels, ncost = labels_cost(Xnum, Xcat, Xlist, Xtime, centroids,
                                     num_dissim, cat_dissim, list_dissim, time_dissim, time_max_values, gamma, n_points, verbose, membship)
 
-        # "early stopping" here when the cost are only 99.99% instead of strictly larger or less than 10 points have been moved
-        converged = (moves < 10) or (ncost >= 0.9999*cost)
+        # INFO: Optional "early stopping" here when the cost are only 99.99% instead of strictly larger or less than 10 points have been moved
+        converged = (moves == 0) or (ncost >= cost)
         epoch_costs.append(ncost)
         cost = ncost
         if verbose:
@@ -750,18 +753,20 @@ def _move_point_list(point, to_clust, from_clust, cl_attr_freq, centroids):
             # recalculate the centroid as it may no longer be the maximum
             centroids[from_clust][iattr] = eval(get_max_value_key(from_attr_counts), )
 
-# Update gamma values based on the standard deviation in each cluster
-@deprecated(reason="Unfair comparison resulting in early stops")
-def _update_gamma_values(gamma, Xnum, centroids, membship, n_clusters):
+def _update_gamma_values(gamma, Xnum, membship, n_clusters):
     """ Updates gamma values for each cluster based on the standard deviation within the data points in each cluster.
 
     :param gamma:       Current gamma values per cluster
     :param Xnum:        Data set numerical columns
-    :param centroids:   Current centroids for k-Prototypes
     :param membship:    Current point-to-cluster association
 
     :returns updated gamma values
     """
+
+    if Xnum.size == 0:
+        return gamma
+
+    gamma = deepcopy(gamma)
     for i in range(n_clusters):
         # 1. Get all points associated to each cluster
         point_indices = np.argwhere(membship[i]).flatten()
@@ -771,5 +776,9 @@ def _update_gamma_values(gamma, Xnum, centroids, membship, n_clusters):
         if associated_points.shape[0] == 0:
             continue
         else:
-            gamma[i] = associated_points.std()
+            gamma[i] = associated_points.std() * 0.5
+
+    return gamma
+
+    
  
