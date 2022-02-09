@@ -56,7 +56,9 @@ def elbow_method(df: pd.DataFrame, max_k: int, indices_map: dict):
         costs.append(cost)
         ch_indeces.append(ch_index)
 
-    chosen_k = range_k[utils.first_peak(ch_indeces)]
+    # Alternatively:
+    # chosen_k = range_k[utils.first_peak(ch_indeces)]
+    chosen_k = range_k[ch_indeces.index(max(ch_indeces))]
     if config.STORE_IMAGES_DURING_EXECUTION or config.SHOW_IMAGES_DURING_EXECUTION:
         utils.check_dir_file(config.PATH_OUTPUT_IMAGES, False)
         path = f"{config.PATH_OUTPUT_IMAGES}/2_0_Elbow_Method.png"
