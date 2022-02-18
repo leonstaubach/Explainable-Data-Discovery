@@ -188,11 +188,13 @@ class KPrototypes(kmodes.KModes):
         labels, cost = labels_cost(Xnum, Xcat, Xlist, Xtime, self._enc_cluster_centroids,
                     self.num_dissim, self.cat_dissim, self.list_dissim, self.time_dissim, time_max_values, self.gamma, n_points, self.verbose)
 
+        # Update to use labels instead of self.labels_
         ch_index = adjusted_ch_index(Xnum, Xcat, Xlist, Xtime, self._enc_cluster_centroids,
                            self.num_dissim, self.cat_dissim, self.list_dissim, self.time_dissim, time_max_values, self.gamma,
-                           self.labels_, cost, self.n_clusters)
+                           labels, cost, self.n_clusters)
 
         self.ch_index = ch_index
+        logging.info(f"\nPrediction Costs: {cost}\t Prediction CH Index: {ch_index}")
         return labels, cost, ch_index
 
     @property
@@ -226,19 +228,9 @@ def adjusted_k_prototypes(X, numerical_indices, categorical_indices, list_indice
     if sparse.issparse(X):
         raise TypeError("k-prototypes does not support sparse data.")
 
-    if categorical_indices is None or not categorical_indices:
-        raise NotImplementedError(
-            "No categorical data selected, effectively doing k-means. "
-            "Present a list of categorical columns, or use scikit-learn's "
-            "KMeans instead."
-        )
     if isinstance(categorical_indices, int):
         categorical_indices = [categorical_indices]
-    assert len(categorical_indices) != X.shape[1], \
-        "All columns are categorical, use k-modes instead of k-prototypes."
-    assert max(categorical_indices) < X.shape[1], \
-        f"Categorical index larger than number of columns: {max(categorical_indices)} vs {X.shape[1]}."
-
+    
     ncatattrs = len(categorical_indices)
     nlistattrs = len(list_indices)
     ntimeattrs = len(time_indices)
@@ -346,19 +338,25 @@ def _k_prototypes_single(Xnum, Xcat, Xlist, Xtime, nnumattrs, ncatattrs, nlistat
             meanx = np.mean(Xnum, axis=0) if Xnum.size!=0 else 0
             stdx = np.std(Xnum, axis=0) if Xnum.size!=0 else 0
             centroids_numerical = meanx + random_state.randn(n_clusters, nnumattrs) * stdx,
-
-        # Only Use numerical part for initialization (No Randomness, but fairness for new feature-set, since Cao applies weights depending on dimensions) 
-        else:
-            centroids_numerical = initial_cluster_centroids
-
-        centroids = [
-            centroids_numerical[0],
-            centroids_categorical,
-            centroids_lists,
-            centroids_time
+            centroids = [
+                        centroids_numerical[0],
+                        centroids_categorical,
+                        centroids_lists,
+                        centroids_time
         ]
+        # Copy over total Centroids
+        else:
+            centroids = [
+                initial_cluster_centroids[0],
+                initial_cluster_centroids[1],
+                initial_cluster_centroids[2],
+                initial_cluster_centroids[3]  
+            ] 
 
         newly_initialized_cluster=deepcopy(centroids)
+
+        logging.info(f"\nInitial Centroids: {centroids}")
+
 
         # From here centroids is an array, where entry1 represents the numerical mean+std and entry2 represents the old centroids
         if verbose:
@@ -387,7 +385,7 @@ def _k_prototypes_single(Xnum, Xcat, Xlist, Xtime, nnumattrs, ncatattrs, nlistat
             print("Initial Cluster Setup")
         for ipoint in tqdm(range(n_points), mininterval=.5, disable= not verbose):
             # Initial assignment to clusters
-            # gamma[0]: since gamma is equal on every cluster initially, just arbitrarely choose index 0.
+
             num_distances=num_dissim(centroids[0], Xnum[ipoint]) if Xnum.size!=0 else 0
             cat_distances=cat_dissim(centroids[1], Xcat[ipoint], X=Xcat, membship=membship) if Xcat.size!=0 else 0
             list_distances=list_dissim(centroids[2], Xlist[ipoint]) if Xlist.size!=0 else 0
@@ -467,7 +465,7 @@ def _k_prototypes_single(Xnum, Xcat, Xlist, Xtime, nnumattrs, ncatattrs, nlistat
                                     num_dissim, cat_dissim, list_dissim, time_dissim, time_max_values, gamma, n_points, verbose, membship)
 
         # INFO: Optional "early stopping" here when the cost are only 99.99% instead of strictly larger or less than 10 points have been moved
-        converged = (moves == 0) or (ncost >= cost)
+        converged = (moves <= 10) or (ncost >= 0.9999*cost)
         epoch_costs.append(ncost)
         cost = ncost
         if verbose:
@@ -577,19 +575,24 @@ def adjusted_ch_index(Xnum, Xcat, Xlist, Xtime, centroids, num_dissim, cat_dissi
     extra_cs = 0.0
     
     total_mean_num = np.mean(Xnum, axis=0) if Xnum.size!=0 else np.empty(0)
-    total_mean_categorical = find_max_frequency_attribute(Xcat)
+    total_centroids_cat = find_max_frequency_attribute(Xcat)
     total_centroids_lists = find_max_frequency_attribute(Xlist, True)
     total_centroids_time = find_max_frequency_attribute(Xtime)
 
     _, counts = np.unique(labels, return_counts=True)
     for i in range(n_clusters):   
         num_costs = num_dissim(np.expand_dims(centroids[0][i], axis=0), total_mean_num) if total_mean_num.size > 0 else 0
-        cat_costs = cat_dissim(np.expand_dims(centroids[1][i], axis=0), total_mean_categorical) if total_mean_categorical.size > 0 else 0
+        cat_costs = cat_dissim(np.expand_dims(centroids[1][i], axis=0), total_centroids_cat) if total_centroids_cat.size > 0 else 0
         lists_costs = list_dissim(np.expand_dims(centroids[2][i], axis=0), total_centroids_lists) if total_centroids_lists.size > 0 else 0
         time_costs = time_dissim(np.expand_dims(centroids[3][i], axis=0), total_centroids_time, time_max_values=time_max_values) if total_centroids_time.size > 0 else 0
+
         tot_costs = num_costs + gamma[i] * (cat_costs + lists_costs + time_costs)
+        logging.info(f"\tNum: {num_costs}\n\tCat:{cat_costs}\n\tLis:{lists_costs}\n\tTim{time_costs}\nTot{tot_costs}")
         extra_cs += counts[i] * tot_costs[0]
 
+    temp_zaehler = extra_cs * (n_samples - n_clusters)
+    temp_nenner = intra_cs * (n_clusters - 1.0)
+    logging.info(f"\nZaehler: {temp_zaehler}\tNenner: {temp_nenner}")
     return (
         1.0
         if intra_cs == 0.0

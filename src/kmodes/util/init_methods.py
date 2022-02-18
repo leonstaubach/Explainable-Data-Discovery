@@ -77,7 +77,7 @@ def init_cao(X, n_clusters, dissim, **kwargs):
     return centroids
 
 def init_cao_lists(X, n_clusters, dissim):
-    """Initialize centroids according to method by Cao et al. [2009], enhanced for bitmaps.
+    """Initialize centroids according to method by Cao et al. [2009], adjusted for collection types.
 
     Note: O(N * attr * n_clusters**2), so watch out with large n_clusters
 

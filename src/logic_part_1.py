@@ -381,7 +381,6 @@ def get_result_table(df: pd.DataFrame = pd.DataFrame()):
     for i in range(size):
         checked_indices = np.argwhere(normalized_filled_mi_matrix>0)
 
-        # ToDo update here
         indices = np.unravel_index(normalized_filled_mi_matrix.argmax(), normalized_filled_mi_matrix.shape)
         if checked_indices.shape[0] <= 2:
             higher_index, lower_index = (indices[0], indices[1]) if copy_avg_normalized_mi_scores[indices[0]] > copy_avg_normalized_mi_scores[indices[1]] else(indices[1], indices[0])

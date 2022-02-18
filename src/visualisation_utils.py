@@ -15,7 +15,7 @@ from sklearn.preprocessing import LabelEncoder
 import seaborn as sns
 import pandas as pd
 import numbers
-
+import datetime
 import config
 
 
@@ -215,8 +215,17 @@ def create_data_distribution_plot_unlabeled(feature_names, marginal_probabilitie
                 fig.delaxes(axs.flat[k])
             break
    
+        # Manual hack to rename types to proper naming (will later be refactored)
         value_labels_i = df_attrs[feature_names[i]].get("classes", [])
-        datatype = str(df_attrs[feature_names[i]].get("datatype"))
+        if df_attrs[feature_names[i]].get("datatype") == list:
+            datatype = "<class 'collection>'"
+        elif df_attrs[feature_names[i]].get("datatype") == datetime.date:
+            datatype = "<class 'cyclic>'"
+        elif df_attrs[feature_names[i]].get("datatype") == str:
+            datatype = "<class 'categorical>'"
+        else:
+            datatype = "<class 'numerical>'"
+        
         create_barchart(value_labels_i, marginal_probabilities[i], "", feature_names[i], datatype, ax, alpha=1.0, index=i)
 
     fig.set_size_inches(*config.DISPLAY_SIZE)
@@ -626,7 +635,7 @@ def create_umap_plot(data_frame: pd.DataFrame, target_labels: list, k: int, indi
 
 
     for i, index in enumerate(numerical_indices):
-        X[:, i+last_index] = data[:, index]
+        X[:, i+last_index] = data[:, index].astype(str)
 
     vis = umap.UMAP(verbose=True, n_jobs=12, n_neighbors=n_neighbors, metric=dist_fct, low_memory=False, min_dist=min_dist)
     embedding = vis.fit_transform(X, target_labels)

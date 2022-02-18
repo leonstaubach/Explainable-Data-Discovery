@@ -15,7 +15,7 @@ def matching_dissim_lists(a: np.ndarray, b: np.ndarray, **_):
     
     :returns distance between arrays
 
-    Calculate the distance between sets A and B through the following formula:
+    Calculate the distance between sets A and B through the following formula (essentially Anti-Sparse Hamming):
     Note that the  '-' operation translates to Python's implementation of the difference operation for sets.
 
     dist(A, B) = max(len(A-B), len(B-A)) / max(len(A), len(B))
@@ -55,28 +55,6 @@ def matching_dissim_lists(a: np.ndarray, b: np.ndarray, **_):
 
 def time_dissim(a: np.ndarray, b: np.ndarray, **kwargs):
     """ Calculates the time difference between different objects. In this case time is treated as a 2D measure (because of the repeating nature of variables like "hour of the day")
-    A simple example illustrating the problem is 'Calculating the difference between the feature "Hour of the day". Two instances 1 (representing 1AM) and 22 (representing 10PM).'.
-    Treated as a numerical variable, the distance with Manhatten measurements would be abs(22-1) = 21.
-
-    The numerical distance fails to know that the actual distance between 1AM and 10PM is 3 (hours) and not 21 (hours). Time is cyclic.
-
-    In order to correctly calculate the distance on the circle, simple value shifting.
-    The formula for one value pair for 'Hour of the Day' is: dist(A,B) = min(abs(A-B), abs((A+12 % 24) - (B+12 % 24)))
-    Note that 24 and 12 represent the length (and half of the length) of the cycle.
-
-    To apply this on the given example:
-    A=1, B=22
-    -> dist(A,B) = min(abs(22-1), abs((1+12 % 24) - (22+12 % 24)))
-                 = min(21, abs(13 - 10))
-                 = min(21, 3)
-                 = 3
-
-    In a final step the distance is normalized by dividing the value over the total length of the cycle: 
-    -> dist_norm(A,B) = dist(A,B) / 24 (in the case of 'Hour of the Day')
-
-    So the distance between 1AM and 10PM is 3 (hours).
-    
-    This formula works for every variable with cyclic numerical instances (e.g. Hour of the Day, Second of the Day, Day of the Week, etc.) that has a finite max length.
 
     :param a:       2D Numpy array
     :param b:       2D Numpy array
@@ -90,13 +68,10 @@ def time_dissim(a: np.ndarray, b: np.ndarray, **kwargs):
     time_max_values = kwargs['time_max_values']
     time_max_values = np.array(time_max_values, dtype=np.int32)
 
-    # Calculate the actual difference, since time is circular
+    # Calculate the actual\ difference, since time is circular
     sub1 = np.absolute(a-b)
-    a_modified = (a+time_max_values//2) % time_max_values
-    b_modified = (b+time_max_values//2) % time_max_values
-    sub2 = np.absolute(a_modified - b_modified)
+    return np.sum(np.minimum(sub1, time_max_values - sub1) / (time_max_values // 2), axis=1, dtype=np.float32)
 
-    return np.sum(np.minimum(sub1, sub2) / (time_max_values // 2), axis=1, dtype=np.float32)
 
 def matching_dissim(a, b, **_):
     """Simple matching dissimilarity function
@@ -205,3 +180,50 @@ def old_matching_dissim_lists(a: np.ndarray, b: np.ndarray, list_max_values: np.
     intermediate = lens1+lens2
  
     return np.sum(intermediate / list_max_values, axis=1)
+
+
+@deprecated(reason="Good Idea but is not required. Because of the modulo operation, we can directly ")
+def time_dissim_old(a: np.ndarray, b: np.ndarray, **kwargs):
+    """ Calculates the time difference between different objects. In this case time is treated as a 2D measure (because of the repeating nature of variables like "hour of the day")
+    A simple example illustrating the problem is 'Calculating the difference between the feature "Hour of the day". Two instances 1 (representing 1AM) and 22 (representing 10PM).'.
+    Treated as a numerical variable, the distance with Manhatten measurements would be abs(22-1) = 21.
+
+    The numerical distance fails to know that the actual distance between 1AM and 10PM is 3 (hours) and not 21 (hours). Time is cyclic.
+
+    In order to correctly calculate the distance on the circle, simple value shifting.
+    The formula for one value pair for 'Hour of the Day' is: dist(A,B) = min(abs(A-B), abs((A+12 % 24) - (B+12 % 24)))
+    Note that 24 and 12 represent the length (and half of the length) of the cycle.
+
+    To apply this on the given example:
+    A=1, B=22
+    -> dist(A,B) = min(abs(22-1), abs((1+12 % 24) - (22+12 % 24)))
+                 = min(21, abs(13 - 10))
+                 = min(21, 3)
+                 = 3
+
+    In a final step the distance is normalized by dividing the value over the total length of the cycle: 
+    -> dist_norm(A,B) = dist(A,B) / 24 (in the case of 'Hour of the Day')
+
+    So the distance between 1AM and 10PM is 3 (hours).
+    
+    This formula works for every variable with cyclic numerical instances (e.g. Hour of the Day, Second of the Day, Day of the Week, etc.) that has a finite max length.
+
+    :param a:       2D Numpy array
+    :param b:       2D Numpy array
+
+    :returns distance between arrays
+    
+    """
+    if a.size==0 or b.size==0:
+        return 0
+
+    time_max_values = kwargs['time_max_values']
+    time_max_values = np.array(time_max_values, dtype=np.int32)
+
+    # Calculate the actual difference, since time is circular
+    sub1 = np.absolute(a-b)
+    a_modified = (a+time_max_values//2) % time_max_values
+    b_modified = (b+time_max_values//2) % time_max_values
+    sub2 = np.absolute(a_modified - b_modified)
+
+    return np.sum(np.minimum(sub1, sub2) / (time_max_values // 2), axis=1, dtype=np.float32)

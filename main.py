@@ -59,8 +59,25 @@ def main():
 
     utils.check_dir_file(config.PATH_OUTPUT_IMAGES, False)
 
-    # 5. Create comparable UMAP view between the full and the optimal feature set
+    # 5. Create tables to represeent the centroids
+    centroids_table, counts_table = create_cluster_table(optimal_indices, list(dataset.get_training_df().columns), optimal_k_prototype.cluster_centroids_, optimal_k_prototype.labels_, dataset.get_training_df().attrs)
+    logging.info(f"\nFinal Centroids:\n{centroids_table.to_markdown()}\n\nWith the following data point counts:\n{counts_table.to_markdown()}")
+
+    # 6. Create a feature importance ranking
+    distance_functions = [euclidean_dissim, matching_dissim, matching_dissim_lists, time_dissim]
+    centroids_feature_map = create_explicit_feature_importance(optimal_indices, optimal_prototype_labels, list(dataset.get_training_df().columns), optimal_k_prototype.cluster_centroids_, dataset.get_training_df(), k, distance_functions)
+    
+    for i, table in enumerate(centroids_feature_map):
+        logging.info(f"\nCluster {i}:\n{table}\n")
+
+    # 7. Visualize the labeling from the clustering algorithm on the optimal feature set
+    visualize_labeled_dataframe_transformation(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, counts_table, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION)
+
+    # 8. Create comparable UMAP view between the full and the optimal feature set
     if config.STORE_IMAGES_DURING_EXECUTION or config.SHOW_IMAGES_DURING_EXECUTION:
+        path = f"{config.PATH_OUTPUT_IMAGES}/3_1_OPTIMAL_FEATURE_k={k}.png"
+        create_umap_plot(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
+    
         path = f"{config.PATH_OUTPUT_IMAGES}/3_0_FULL_FEATURE_k={k}.png"
         full_indices_map = utils.create_indices_map(dataset.get_training_df().columns, dataset.get_training_df().attrs)
 
@@ -69,22 +86,7 @@ def main():
         full_prototype_labels, _, _ = full_k_prototype.fit_predict(dataset.get_training_df(), indices_map=full_indices_map)
         create_umap_plot(dataset.get_training_df(), full_prototype_labels, k, full_indices_map, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
         
-        path = f"{config.PATH_OUTPUT_IMAGES}/3_1_OPTIMAL_FEATURE_k={k}.png"
-        create_umap_plot(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
-    
-    # 6. Create tables to represeent the centroids
-    centroids_table, counts_table = create_cluster_table(optimal_indices, list(dataset.get_training_df().columns), optimal_k_prototype.cluster_centroids_, optimal_k_prototype.labels_, dataset.get_training_df().attrs)
-    logging.info(f"\nFinal Centroids:\n{centroids_table.to_markdown()}\n\nWith the following data point counts:\n{counts_table.to_markdown()}")
 
-    # 7. Create a feature importance ranking
-    distance_functions = [euclidean_dissim, matching_dissim, matching_dissim_lists, time_dissim]
-    centroids_feature_map = create_explicit_feature_importance(optimal_indices, optimal_prototype_labels, list(dataset.get_training_df().columns), optimal_k_prototype.cluster_centroids_, dataset.get_training_df(), k, distance_functions)
-    
-    for i, table in enumerate(centroids_feature_map):
-        logging.info(f"\nCluster {i}:\n{table}\n")
-
-    # 8. Visualize the labeling from the clustering algorithm on the optimal feature set
-    visualize_labeled_dataframe_transformation(dataset.get_training_df(), optimal_prototype_labels, k, optimal_indices, counts_table, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION)
 
 if __name__ == "__main__":
     log_path = config.LOG_PATH + f"/{config.create_processed_data_path(False)}.log"

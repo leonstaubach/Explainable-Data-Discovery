@@ -56,13 +56,25 @@ This process might not be optimal, if:
 
 Furthermore, the underlying raw activity data is not uploaded to this repository due to NDA reasons.
 
+Note, that within the code, `time` reflects cyclic data in general. Similarly `list` reflects collection data.
+Those are arbitrary namings and this will be unified in the future.
+
 ### Outlook
 
 ##### Code
 
 Currently, the data is required to be in parquet format. Future efforts should be used to provide a simple interface for different data sources, including `csv` Files or common database connectors.
 
-Furthermore a single k-Prototypes process should be executable in parallel to decrease runtime.
+Also, the current implementation contains hardcoded compatabilities for numerical, categorical, collection and cyclic data. This can be generalized by implementing a generic approach of adding any kind of datatype that is distinguishable from raw data. Required functionalities are
+- a unique distance function (to be applied between instances of that feature), defined under `src/kmodes/util/dissim.py`
+- a unique initialization function (to be called whenever a new k-Prototypes run starts), defined under `src/kmodes/util/init_methods.py`
+- potential normalization for part1 (in order to calculate discrete statistical metrics), defined under `src/logic_part1.py`
+
+
+Furthermore, a single k-Prototypes process should be executable in parallel to decrease runtime.
+For this, concurrent hashmaps should be used to count the values per cluster so that the data points can be equally split between the different threads.
+
+
 
 ##### Research
 

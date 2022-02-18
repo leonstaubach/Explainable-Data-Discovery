@@ -38,8 +38,8 @@ K_PROTOTYPE_REPEAT_NUM = 5
 # False is recommended per default for comparability between iterations of clustering.
 # True can be used for experimental reasons.
 UPDATE_GAMMA_EACH_ITERATION = False
-# Which formula to use for the feature ranking. Options: {"formula+1", "formula_normalized"}
-FEATURE_IMPORTANCE_METRIC = "formula+1"
+# Which formula to use for the feature ranking. Options: {"formula_updated", formula+1", "formula_normalized"}
+FEATURE_IMPORTANCE_METRIC = "formula_updated"
 #############################################################################################################
 
 #############################################################################################################

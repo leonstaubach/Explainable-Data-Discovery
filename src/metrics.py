@@ -119,19 +119,18 @@ def create_explicit_feature_importance(indices_map, labels, columns, centroids, 
             if isinstance(data_i[0, j], float):
                 current_feature_values = check_array(current_feature_values) 
                 other_feature_values = check_array(other_feature_values) 
-            #if indx == 3:
-            intra_cs = (distance_function(current_feature_values, feature_centroid, time_max_values=indices_map["time_max_values"]) / current_feature_values.shape[1])[0]
-            extra_cs = (distance_function(other_feature_values, feature_centroid, time_max_values=indices_map["time_max_values"]) / other_feature_values.shape[1])[0]
-            #else:    
-            #    intra_cs = (distance_function(current_feature_values, feature_centroid) / current_feature_values.shape[1])[0]
-            #    extra_cs = (distance_function(other_feature_values, feature_centroid) / other_feature_values.shape[1])[0]
+
+            cyclic_lookup = [indices_map["time_max_values"][seen[indx]]] if indx == 3 else None
+            intra_cs = (distance_function(current_feature_values, feature_centroid, time_max_values=cyclic_lookup) / current_feature_values.shape[1])[0]
+            extra_cs = (distance_function(other_feature_values, feature_centroid, time_max_values=cyclic_lookup) / other_feature_values.shape[1])[0]
 
             seen[indx] += 1
             cluster_result[feature_name] = {
                 "intra_cs": intra_cs,
                 "extra_cs": extra_cs,
                 "formula+1": extra_cs/(intra_cs+1),
-                "formula_normalized": extra_cs/(extra_cs+intra_cs)
+                "formula_normalized": extra_cs/(extra_cs+intra_cs),
+                "formula_updated": max(extra_cs-intra_cs, 0)/ extra_cs
             }
 
         intermediate_result.append(cluster_result)

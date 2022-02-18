@@ -54,8 +54,9 @@ def elbow_method(df: pd.DataFrame, max_k: int, indices_map: dict):
         k_prototype = KPrototypes(n_clusters=k, init='Cao', n_init=config.K_PROTOTYPE_REPEAT_NUM, verbose=verbose, n_jobs=n_jobs)
         _, cost , ch_index = k_prototype.fit_predict(df, indices_map=indices_map)
         costs.append(cost)
-        ch_indeces.append(ch_index)
 
+        ch_indeces.append(ch_index)
+        logging.info(f"\nFinished Elbow Test for k={k}, resulted in costs: {cost}\tch-index: {ch_index}")
     # Alternatively:
     # chosen_k = range_k[utils.first_peak(ch_indeces)]
     chosen_k = range_k[ch_indeces.index(max(ch_indeces))]
@@ -258,7 +259,6 @@ def execute_iterative_clustering(df: pd.DataFrame = pd.DataFrame(), meta_data: d
             logging.info(f"\nFullSet: {indices_map} -> NCH={normalized_ch_index} against\nRemovedSet: {indices_map_next} -> NCH={normalized_ch_index_next}")
 
             # If the reduced solution is atleast 99.99% as good (to handle minor movements through initialization or equal values): delete the feature 
-            
             if normalized_ch_index_next >= 0.9999*normalized_ch_index:
                 logging.info(f"\nRemoved Feature {removed_feature}")  
 

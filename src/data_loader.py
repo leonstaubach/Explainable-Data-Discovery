@@ -60,14 +60,26 @@ def prepare_dataset(df: pd.DataFrame, ignore_times: bool=False, ignore_lists: bo
             df.attrs[col] = {"datatype": numbers.Number, "min_value": min_max_scaler.data_min_[0], "max_value": min_max_scaler.data_max_[0]}
             print(f"[{col}] Number -> Scaled to [0, 1] with a min-max of {min_max_scaler.data_min_[0]}-{min_max_scaler.data_max_[0]}")
         elif isinstance(value, str):
-
-            # sklearn's implementation of LabelEncoder does order the classes by sorting them. For the specific column "day_of_the_week"
-            # the names need a custom ordering.
+            # day of week is a sstring but should be treated as a time variable, therefore hack it manually!
             if col == "day_of_week":
                 weekday_lookup = {"Monday": 0, "Tuesday": 1, "Wednesday": 2, "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6}
 
-                df[col] = df[col].apply(lambda x: weekday_lookup[x])
-                df.attrs[col] = {"datatype": str, "classes" : list(weekday_lookup.keys())}
+                # Day of the Week is a cyclic variable, therefore it should be transformed into a numerical variable
+                if ignore_times:
+                    min_max_scaler = MinMaxScaler()
+                    # Transform weekdays to their proper indices as defined in weekday_lookup
+                    d = np.array(df[col].apply(lambda x: weekday_lookup[x]))
+                    #data = np.array([int(value.strftime(config.TIME_FORMAT)) for value in tqdm(df[col])])
+                    df[col] = min_max_scaler.fit_transform(d.reshape((-1, 1))).reshape(-1)
+                    df.attrs[col] = {"datatype": numbers.Number, "min_value": min_max_scaler.data_min_[0], "max_value": min_max_scaler.data_max_[0]}
+                    print(f"[{col}] Number -> Scaled to [0, 1] with a min-max of {min_max_scaler.data_min_[0]}-{min_max_scaler.data_max_[0]}")
+
+                else:
+                    df[col] = df[col].apply(lambda x: weekday_lookup[x])
+                    #df[col] = [int(value.strftime(config.TIME_FORMAT)) for value in tqdm(df[col])]
+                    print(f"[{col}] Time/Format -> Applied format DAY OF THE WEEK")
+
+                    df.attrs[col] = {"datatype": datetime.date, "format": "DAY_OF_WEEK", "max_time_value": len(weekday_lookup)}
             else:
                 label_encoder = LabelEncoder()
                 df[col] = label_encoder.fit_transform(df[col])
@@ -126,6 +138,7 @@ class CustomDataset:
         
         """
         df = load_df(data_description_path)
+        df = df[df.columns.difference(config.IMMEDIATLY_DROPPABLE_COLUMNS)]
         self.df_training = df[df.columns.difference(config.IGNORABLE_FEATURES_FOR_EVAL)]
         print(self.df_training)
 
