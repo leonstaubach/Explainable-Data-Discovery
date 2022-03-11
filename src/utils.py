@@ -10,7 +10,7 @@ import os
 from numbers import Number
 from copy import deepcopy
 
-from config import return_current_config_dict
+from config import return_current_config_dict, MAX_BIN_NUMBER, BIN_RATIO
 
 # Just a quick definition for a custom exception..
 class WouldTryRandomInitialization(Exception):
@@ -401,6 +401,25 @@ def initialize_gamma(Xnum, n_cluster):
     else:
         return np.array([1]*n_cluster, dtype=np.int32)
 
+
+def equal_width_binning(column: np.array) -> np.array:
+    """ Transform numerical variables into bin's in order to not overflow unique value counts for probability calculation.
+        Using Equal Width Binning over Equal Frequency Binning, because i want to count occurences and don't care about equally filled intervals.
+
+    :param column:  The given numerical data column to transform
+
+    :returns binned version of data column
+    """
+    min_value, max_value = np.amin(column), np.amax(column)
+    num_entries = column.shape[0]
+    # Create up to config.BIN_RATIO% of the columns size unique values.
+    ratio = BIN_RATIO
+    number_of_bins = round(min(num_entries * ratio, MAX_BIN_NUMBER))
+
+    interval_width = (max_value-min_value) / number_of_bins
+    # Calculates bin values so that the output has a value range of [1, number_bins]
+
+    return (column // interval_width).astype(np.min_scalar_type(number_of_bins)), interval_width, number_of_bins
 
 if __name__ == "__main__":
     print(config_to_str())

@@ -20,6 +20,9 @@ def matching_dissim_lists(a: np.ndarray, b: np.ndarray, **_):
 
     dist(A, B) = max(len(A-B), len(B-A)) / max(len(A), len(B))
     
+    Alternatively: dist(A, B) = 1 - (len(A.intersection(B)) / max(len(A), len(B)))
+    -> This is computationally cheapter, but (potentially) less vectorized in numpy. Investigate!
+    
     note that dist(A, B) = dist(B, A)
 
     e.g.    dist({"A"}, {"B"}) = max(1, 1) / max(1,1) = 1 (max distance)

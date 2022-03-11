@@ -272,6 +272,7 @@ def adjusted_k_prototypes(X, numerical_indices, categorical_indices, list_indice
             for init_no, seed in enumerate(seeds))
     all_centroids, all_labels, all_costs, all_n_iters, all_epoch_costs, all_initialized_clusters = zip(*results)
 
+    logging.info(f"\nAll Costs: {all_costs}, Mean Costs: {np.mean(all_costs)}, Std Costs: {np.std(all_costs)}, Std over Mean: {np.std(all_costs)/np.mean(all_costs)}")
     best = np.argmin(all_costs)
     if n_init > 1 and verbose:
         print("Best run was number {}".format(best + 1))

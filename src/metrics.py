@@ -130,7 +130,7 @@ def create_explicit_feature_importance(indices_map, labels, columns, centroids, 
                 "extra_cs": extra_cs,
                 "formula+1": extra_cs/(intra_cs+1),
                 "formula_normalized": extra_cs/(extra_cs+intra_cs),
-                "formula_updated": max(extra_cs-intra_cs, 0)/ extra_cs
+                "formula_updated": max(extra_cs-intra_cs, 0)/ extra_cs if extra_cs > 0 else 0
             }
 
         intermediate_result.append(cluster_result)

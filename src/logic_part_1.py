@@ -27,24 +27,6 @@ This part of the process analyzes the general distribution of the data. Some res
 - ranking features based on remaining highest mutual information (redundancy ranking)
 
 """
-def equal_width_binning(column: np.array) -> np.array:
-    """ Transform numerical variables into bin's in order to not overflow unique value counts for probability calculation.
-        Using Equal Width Binning over Equal Frequency Binning, because i want to count occurences and don't care about equally filled intervals.
-
-    :param column:  The given numerical data column to transform
-
-    :returns binned version of data column
-    """
-    min_value, max_value = np.amin(column), np.amax(column)
-    num_entries = column.shape[0]
-    # Create up to config.BIN_RATIO% of the columns size unique values.
-    ratio = config.BIN_RATIO
-    number_of_bins = round(min(num_entries * ratio, config.MAX_BIN_NUMBER))
-
-    interval_width = (max_value-min_value) / number_of_bins
-    # Calculates bin values so that the output has a value range of [1, number_bins]
-
-    return (column // interval_width).astype(np.min_scalar_type(number_of_bins)), interval_width, number_of_bins
 
 def prepare_data_for_mutual_information(df: pd.DataFrame) -> np.ndarray:
     """ Transform df data to numpy. Also apply binning to numerical values.
@@ -57,7 +39,7 @@ def prepare_data_for_mutual_information(df: pd.DataFrame) -> np.ndarray:
 
     for i, col in enumerate(df.columns):
         if df.attrs[col]["datatype"] == numbers.Number:
-            returned_data, interval_width, number_of_bins = equal_width_binning(numpy_data[:, i])
+            returned_data, interval_width, number_of_bins = utils.equal_width_binning(numpy_data[:, i])
             numpy_data[:, i] = returned_data
             df.attrs[col]["interval_width"] = interval_width
             df.attrs[col]["number_of_bins"] = number_of_bins
@@ -386,18 +368,14 @@ def get_result_table(df: pd.DataFrame = pd.DataFrame()):
             higher_index, lower_index = (indices[0], indices[1]) if copy_avg_normalized_mi_scores[indices[0]] > copy_avg_normalized_mi_scores[indices[1]] else(indices[1], indices[0])
 
             worst_indices_attributes.append(higher_index)
-            worst_avg_scores.append(copy_avg_normalized_mi_scores[higher_index])
+            worst_avg_scores.append(normalized_filled_mi_matrix[indices])
             worst_associated_partner.append(lower_index)
 
             worst_indices_attributes.append(lower_index)
-            worst_avg_scores.append(copy_avg_normalized_mi_scores[lower_index])
+            worst_avg_scores.append(normalized_filled_mi_matrix[indices])
             worst_associated_partner.append(higher_index)
             break
-            for i, value in enumerate(checked_indices[0,:]):
-                worst_indices_attributes.append(value)
-                worst_avg_scores.append(average_normalized_mi_scores[value])
-                worst_associated_partner.append(checked_indices[0, len(checked_indices[0:]) - i-1])
-            break
+
 
         indices = np.unravel_index(normalized_filled_mi_matrix.argmax(), normalized_filled_mi_matrix.shape)
 
@@ -414,7 +392,7 @@ def get_result_table(df: pd.DataFrame = pd.DataFrame()):
             target=option_a
         else:
             target=option_b 
-            
+
         worst_avg_scores.append(normalized_filled_mi_matrix[indices])
         # Fill matrix with really high values
         normalized_filled_mi_matrix[:, target] = np.array([0]*size)

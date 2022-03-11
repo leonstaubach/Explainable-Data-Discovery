@@ -18,6 +18,8 @@ import numbers
 import datetime
 import config
 
+import src.utils as utils
+
 
 def _transform_value_to_label(label_list, value):
     """ Transform a given value to a displayable label.
@@ -633,10 +635,9 @@ def create_umap_plot(data_frame: pd.DataFrame, target_labels: list, k: int, indi
 
     last_index += len(list_indices)
 
-
     for i, index in enumerate(numerical_indices):
-        X[:, i+last_index] = data[:, index].astype(str)
-
+        X[:, i+last_index], _, _ = utils.equal_width_binning(data[:, index])
+        X[:, i+last_index] = X[:, i+last_index].astype(str)
     vis = umap.UMAP(verbose=True, n_jobs=12, n_neighbors=n_neighbors, metric=dist_fct, low_memory=False, min_dist=min_dist)
     embedding = vis.fit_transform(X, target_labels)
 

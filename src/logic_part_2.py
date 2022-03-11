@@ -63,7 +63,7 @@ def elbow_method(df: pd.DataFrame, max_k: int, indices_map: dict):
     if config.STORE_IMAGES_DURING_EXECUTION or config.SHOW_IMAGES_DURING_EXECUTION:
         utils.check_dir_file(config.PATH_OUTPUT_IMAGES, False)
         path = f"{config.PATH_OUTPUT_IMAGES}/2_0_Elbow_Method.png"
-        create_linecharts_elbow_method(range_k, ch_indeces, costs, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
+        create_linecharts_elbow_method(range_k, costs, ch_indeces, config.STORE_IMAGES_DURING_EXECUTION, config.SHOW_IMAGES_DURING_EXECUTION, path)
     
     return chosen_k
 
