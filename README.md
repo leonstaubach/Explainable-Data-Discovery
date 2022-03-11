@@ -72,8 +72,7 @@ Also, the current implementation contains hardcoded compatabilities for numerica
 
 
 Furthermore, a single k-Prototypes process should be executable in parallel to decrease runtime.
-For this, concurrent hashmaps should be used to count the values per cluster so that the data points can be equally split between the different threads.
-
+For this, the approach proposed in this paper can be investigated: 10.1109/DSAA.2015.7344894.
 
 
 ##### Research
@@ -90,4 +89,3 @@ In the future some important tasks are
 
 - Applying mixed-data logic on other existing clustering algorithms (like DBSCan)
 - More sophisticated way of aggregating different datatypes for a fair comparison
-
