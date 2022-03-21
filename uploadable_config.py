@@ -9,8 +9,8 @@ from datetime import datetime
 API_KEY = "NameOfTheApiKey"
 # The current activity type
 TARGET_ACTIVITY_TYPE = "NameOfTheActivityType"
-# Optional (if multiple version of the data exists)
-TEST_MODE_CATEGORY = ""
+# Optional (if multiple version of the data exists, e.g. {'Full', 'Medium', 'Test', ...})
+TEST_MODE_CATEGORY = "DEFAULT"
 # Compression algorithm used for the data (for logging and path resolving only)
 COMPRESSION_ALGORITHM="gzip"
 # Relative path of the parqet file (for example the local folder 'data'
@@ -24,7 +24,8 @@ BASE_PROCESSED_DATA_FOLDER = "data"
 SHOW_IMAGES_DURING_EXECUTION=False
 # Whether to store the plots to disk
 STORE_IMAGES_DURING_EXECUTION=True
-# Format of the time variable (should be a format that can be directly transformed to an integer)
+# Format of the time variable (should be a format that can be directly transformed to an integer,
+# should be updated in the future, since it is a very manual approach)
 TIME_FORMAT = "%H"
 # Whether to preload features from the metadata file or not.
 TRY_PRELOAD_FEATURES = True
@@ -39,6 +40,7 @@ K_PROTOTYPE_REPEAT_NUM = 5
 # True can be used for experimental reasons.
 UPDATE_GAMMA_EACH_ITERATION = False
 # Which formula to use for the feature ranking. Options: {"formula_updated", formula+1", "formula_normalized"}
+# , see src/metrics.py
 FEATURE_IMPORTANCE_METRIC = "formula_updated"
 #############################################################################################################
 
