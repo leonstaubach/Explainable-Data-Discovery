@@ -42,6 +42,8 @@ UPDATE_GAMMA_EACH_ITERATION = False
 # Which formula to use for the feature ranking. Options: {"formula_updated", formula+1", "formula_normalized"}
 # , see src/metrics.py
 FEATURE_IMPORTANCE_METRIC = "formula_updated"
+# Whether to remove outliers (based on the Z-Score metric with a threshold of 3)
+REMOVE_OUTLIERS = True
 #############################################################################################################
 
 #############################################################################################################
