@@ -39,6 +39,37 @@ def load_df(data_description_path: str):
 
     return loaded_table.to_pandas()
 
+def remove_outliers(df: pd.DataFrame, threshold: int = 3):
+    """ Removes outliers for numerical features based on the Z-Scores """
+
+    relevant_indices = set()
+    # 1. Go over each column
+    for col in df.columns:
+        value = df[col].iloc[0]
+        # 1.1. Check if columns' first value is a number, only continue if yes 
+        if isinstance(value, numbers.Number):
+            # 1.2. Grab all values in the column
+            data = df[col].to_numpy()
+            mean = np.mean(data)
+            std = np.std(data)
+
+            outlier = []
+            for index, i in enumerate(data):
+                # 1.3. Calculate Z-Score (mean, std) and apply to whole column
+                z = (i-mean)/std
+                if z > threshold:
+                    outlier.append(index)
+
+            # 1.5. Add indices to a global list
+            relevant_indices.update(outlier)
+        else:
+            pass
+
+    logging.info(f"\nFound and removed a total of {len(relevant_indices)} outliers")
+
+    # 2. Remove all Entries from pandas dataframe from global list
+    return df.drop(df.index[list(relevant_indices)], inplace=False)
+
 
 def prepare_dataset(df: pd.DataFrame, ignore_times: bool=False, ignore_lists: bool=False) -> None:
     """ Preparing the given data frame for the process by writing into it's attributes.
@@ -139,6 +170,10 @@ class CustomDataset:
         """
         df = load_df(data_description_path)
         df = df[df.columns.difference(config.IMMEDIATLY_DROPPABLE_COLUMNS)]
+        
+        if config.REMOVE_OUTLIERS:
+            df = remove_outliers(df)
+            
         self.df_training = df[df.columns.difference(config.IGNORABLE_FEATURES_FOR_EVAL)]
         print(self.df_training)
 
